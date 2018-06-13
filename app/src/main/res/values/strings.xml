@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">My route</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="timerVal">00:00:00</string>
+    <string name="pauseButtonLabel">Start</string>
+    <string name="startButtonLabel">Stop</string>
+</resources>
