@@ -2,11 +2,14 @@ package com.example.lenovo_pc.ros_media_ig;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,9 +38,14 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.widget.TextView;
 
-public class MapsActivity extends AppCompatActivity implements LocationListener {
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import java.util.ArrayList;
 
-    private GoogleMap myMap;
+public class MapsActivity extends AppCompatActivity implements LocationListener
+        {
+
+    protected GoogleMap myMap;
     private ProgressDialog myProgress;
 
     private static final String MYTAG = "MYTAG";
@@ -54,6 +63,20 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     // Value 8bit (value <256)
     public static final int REQUEST_ID_ACCESS_COURSE_FINE_LOCATION = 100;
 
+    private static final String TAG = "MainActivity";
+    protected static final long INTERVAL = 1000 * 60 * 1; //1 minute
+    protected static final long FASTEST_INTERVAL = 1000 * 60 * 1; // 1 minute
+    protected static final float SMALLEST_DISPLACEMENT = 0.25F; //quarter of a meter
+
+    protected static final long LOCATION_UPDATE_INTERVAL = 1000 * 60 * 1; //1 minute //only for tests, to check yet
+    protected static final float LOCATION_UPDATE_MIN_DISTANCE = 0.25F; //only for tests, to check yet
+
+    protected ArrayList<LatLng> points; //added
+    Polyline line; //added
+    protected LocationRequest mLocationRequest;
+    private Location mCurrentLocation;
+    protected Location startLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,30 +91,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         // Display Progress Bar.
         myProgress.show();
 
+        points = new ArrayList<LatLng>(); //added
+
         timerValue = (TextView) findViewById(R.id.timerValue);
 
-        Start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTime = SystemClock.uptimeMillis();
-                customHandler.postDelayed(updateTimerThread, 0);
-                //czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera
-                //w  xml-u dorób jeszcze action w tym przycisku, sprawdz czy w stringach dobrze zaklasyfikowane
-            }
-        });
-
-        Stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
-                //zatrzymywanie timera
-                //w  xml-u dorób jeszcze action w tym przycisku, sprawdz czy w stringach dobrze zaklasyfikowane
-            }
-        });
-
         //mialo byc private, ale not allowed...
-         Runnable updateTimerThread = new Runnable() {
+        Runnable updateTimerThread = new Runnable() {
             public void run() {
                 timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
                 updatedTime = timeSwapBuff + timeInMilliseconds;
@@ -100,8 +105,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 secs = secs % 60;
                 int milliseconds = (int) (updatedTime % 1000);
                 timerValue.setText("" + mins + ":"
-                                + String.format("%02d", secs) + ":"
-                                + String.format("%03d", milliseconds));
+                        + String.format("%02d", secs) + ":"
+                        + String.format("%03d", milliseconds));
                 customHandler.postDelayed(this, 0);
             }
         };
@@ -111,13 +116,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
         // Set callback listener, on Google Map ready.
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                onMyMapReady(googleMap);
-            }
-        });
+            mapFragment.getMapAsync(this);
+       // mapFragment.getMapAsync(new OnMapReadyCallback() {
+        //      onMyMapReady(myMap);
+        //});
 
     }
 
@@ -286,7 +288,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-
+    //maybe comment it, becouse is in listener of a button
     @Override
     public void onLocationChanged(Location location) {
     }
@@ -303,4 +305,31 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     public void onProviderDisabled(String provider) {
     }
 
-}
+    Start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTime = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread, 0);
+                //czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera
+                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+
+                startLocation = new Location("");
+                Start.createLocationRequest();
+                Start.startGpsListening(start);
+                Start.onLocationChanged(mCurrentLocation);//?? czy w current cos jest wgl
+
+            }
+
+            Stop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    timeSwapBuff += timeInMilliseconds;
+                    customHandler.removeCallbacks(updateTimerThread);
+                    //zatrzymywanie timera
+                    //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+                }
+            });
+
+
+
+        }

@@ -27,7 +27,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     //mine:
     implementation ("com.google.android.gms:play-services-maps:15.0.1") {
-        force = true;
+        force = true; //maybe second time yet this writting is here
     }
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.android.support:support-annotations:27.1.1' // in order to not to see:
@@ -37,5 +37,12 @@ dependencies {
     // See https://d.android.com/r/tools/test-apk-dependency-conflicts.html for details.
     // Information:Gradle tasks [:app:generateDebugSources, :app:generateDebugAndroidTestSources,
     // :app:mockableAndroidJar]
+
+
+    //noinspection UseOfBundledGooglePlayServices
+    compile 'com.google.android.gms:play-services:12.0.1'
+    compile 'com.google.maps.android:android-maps-utils:0.3+'
+
+
 
 }
