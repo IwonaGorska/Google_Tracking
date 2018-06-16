@@ -1,4 +1,4 @@
-package com.example.lenovo_pc.ros_media_ig;
+ package com.example.lenovo_pc.ros_media_ig;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -50,8 +50,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
 
     private static final String MYTAG = "MYTAG";
 
-    final Button Start = (Button)findViewById(R.id.button1);
-    final Button Stop = (Button)findViewById(R.id.button2);
+    private Button StartB;
+    private Button StopB;
     private TextView timerValue;
     private long startTime = 0L;
     private Handler customHandler = new Handler();
@@ -77,11 +77,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     private Location mCurrentLocation;
     protected Location startLocation;
 
+    Context context;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        StartB = (Button)findViewById(R.id.button1);
+        StopB = (Button)findViewById(R.id.button2);
 
         // Create Progress Bar.
         myProgress = new ProgressDialog(this);
@@ -95,8 +100,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
 
         timerValue = (TextView) findViewById(R.id.timerValue);
 
+        context = getApplicationContext();
+
         //mialo byc private, ale not allowed...
-        Runnable updateTimerThread = new Runnable() {
+        final Runnable updateTimerThread = new Runnable() {
             public void run() {
                 timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
                 updatedTime = timeSwapBuff + timeInMilliseconds;
@@ -116,10 +123,40 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
                 = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
         // Set callback listener, on Google Map ready.
-            mapFragment.getMapAsync(this);
-       // mapFragment.getMapAsync(new OnMapReadyCallback() {
-        //      onMyMapReady(myMap);
-        //});
+          //  mapFragment.getMapAsync(this);
+
+        //solving full of doubts!!!
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                onMyMapReady(myMap);
+            }
+        });
+
+
+        StartB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                StartC startExample = new StartC();
+                startTime = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread,0);
+                //czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera
+                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+                startLocation = new Location("");
+                startExample.createLocationRequest();
+                startExample.startGpsListening(startLocation);//CHECK IF STARTLOCATION IS WELL INITIALIZED
+                startExample.onLocationChanged(mCurrentLocation);//?? czy w current cos jest wgl
+            }});
+
+        StopB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeSwapBuff += timeInMilliseconds;
+                customHandler.removeCallbacks(updateTimerThread);
+                //zatrzymywanie timera
+                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+            }
+        });
 
     }
 
@@ -305,30 +342,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     public void onProviderDisabled(String provider) {
     }
 
-    Start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTime = SystemClock.uptimeMillis();
-                customHandler.postDelayed(updateTimerThread, 0);
-                //czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera
-                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
-
-                startLocation = new Location("");
-                Start.createLocationRequest();
-                Start.startGpsListening(start);
-                Start.onLocationChanged(mCurrentLocation);//?? czy w current cos jest wgl
-
-            }
-
-            Stop.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    timeSwapBuff += timeInMilliseconds;
-                    customHandler.removeCallbacks(updateTimerThread);
-                    //zatrzymywanie timera
-                    //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
-                }
-            });
 
 
 
