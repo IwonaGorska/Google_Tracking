@@ -43,7 +43,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener
-        {
+{
 
     protected GoogleMap myMap;
     private ProgressDialog myProgress;
@@ -59,10 +59,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     long timeSwapBuff = 0L;
     long updatedTime = 0L;
 
-    // Request Code to ask the user for permission to view their current location (***).
-    // Value 8bit (value <256)
     public static final int REQUEST_ID_ACCESS_COURSE_FINE_LOCATION = 100;
-
     private static final String TAG = "MainActivity";
     protected static final long INTERVAL = 1000 * 60 * 1; //1 minute
     protected static final long FASTEST_INTERVAL = 1000 * 60 * 1; // 1 minute
@@ -71,17 +68,19 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     protected static final long LOCATION_UPDATE_INTERVAL = 1000 * 60 * 1; //1 minute //only for tests, to check yet
     protected static final float LOCATION_UPDATE_MIN_DISTANCE = 0.25F; //only for tests, to check yet
 
-    protected ArrayList<LatLng> points; //added
-    Polyline line; //added
+    //Create member variables for the ArrayList and the Polyline:
+    protected ArrayList<LatLng> points;
+    Polyline line;
     protected LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
+    private Location mCurrentLocation; // not needed
     protected Location startLocation;
 
     Context context;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
@@ -96,14 +95,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
         // Display Progress Bar.
         myProgress.show();
 
-        points = new ArrayList<LatLng>(); //added
+        //Initialize points
+        points = new ArrayList<LatLng>();
 
         timerValue = (TextView) findViewById(R.id.timerValue);
 
         context = getApplicationContext();
 
-        //mialo byc private, ale not allowed...
-        final Runnable updateTimerThread = new Runnable() {
+        //I wanted it to be "private" but: "not allowed" error appeared
+        final Runnable updateTimerThread = new Runnable()
+        {
             public void run() {
                 timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
                 updatedTime = timeSwapBuff + timeInMilliseconds;
@@ -126,48 +127,57 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
           //  mapFragment.getMapAsync(this);
 
         //solving full of doubts!!!
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
+        mapFragment.getMapAsync(new OnMapReadyCallback()
+        {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
+            public void onMapReady(GoogleMap googleMap)
+            {
                 onMyMapReady(myMap);
             }
         });
 
 
-        StartB.setOnClickListener(new View.OnClickListener() {
+        StartB.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v){
+            public void onClick(View v)
+            {
                 StartC startExample = new StartC();
                 startTime = SystemClock.uptimeMillis();
                 customHandler.postDelayed(updateTimerThread,0);
-                //czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera
-                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+                //(czyszczenie linii, zaczynanie rysowania nowej linii, czyszczenie timera  i ruszanie timera od zera
+                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane)
                 startLocation = new Location("");
                 startExample.createLocationRequest();
-                startExample.startGpsListening(startLocation);//CHECK IF STARTLOCATION IS WELL INITIALIZED
+                startExample.startGpsListening(startLocation);//CHECK IF STARTLOCATION IS WELL INITIALIZED!!!
                 startExample.onLocationChanged(mCurrentLocation);//?? czy w current cos jest wgl
             }});
 
-        StopB.setOnClickListener(new View.OnClickListener() {
+        StopB.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 timeSwapBuff += timeInMilliseconds;
                 customHandler.removeCallbacks(updateTimerThread);
-                //zatrzymywanie timera
-                //w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane
+                //stopping the timer
+                //(w  xml-u dorobic jeszcze action w tym przycisku, sprawdzic czy w stringach dobrze zaklasyfikowane)
             }
         });
 
     }
 
-    private void onMyMapReady(GoogleMap googleMap) {
+    private void onMyMapReady(GoogleMap googleMap)
+    {
         // Get Google Map from Fragment.
         myMap = googleMap;
         // Sét OnMapLoadedCallback Listener.
-        myMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+        myMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
+        {
 
             @Override
-            public void onMapLoaded() {
+            public void onMapLoaded()
+            {
                 // Map loaded. Dismiss this dialog, removing it from the screen.
                 myProgress.dismiss();
 
@@ -177,15 +187,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
         myMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         myMap.getUiSettings().setZoomControlsEnabled(true);
 
-        //komentuje, ale chyba potrzebne bardzo
+        //Maybe it's very needed, don't know
         //myMap.setMyLocationEnabled(true);
     }
 
 
-    private void askPermissionsAndShowMyLocation() {
+    private void askPermissionsAndShowMyLocation()
+    {
 
         // With API> = 23, you have to ask the user for permission to view their location.
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23)
+        {
             int accessCoarsePermission
                     = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
             int accessFinePermission
@@ -193,7 +205,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
 
 
             if (accessCoarsePermission != PackageManager.PERMISSION_GRANTED
-                    || accessFinePermission != PackageManager.PERMISSION_GRANTED) {
+                    || accessFinePermission != PackageManager.PERMISSION_GRANTED)
+            {
                 // The Permissions to ask user.
                 String[] permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION};
@@ -212,26 +225,28 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     // When you have the request results.
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-
+                                           String permissions[], int[] grantResults)
+    {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //
-        switch (requestCode) {
-            case REQUEST_ID_ACCESS_COURSE_FINE_LOCATION: {
+        switch (requestCode)
+        {
+            case REQUEST_ID_ACCESS_COURSE_FINE_LOCATION:
+                {
 
                 // Note: If request is cancelled, the result arrays are empty.
                 // Permissions granted (read/write).
                 if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                {
                     Toast.makeText(this, "Permission granted!", Toast.LENGTH_LONG).show();
 
                     // Show current location on Map.
                     this.showMyLocation();
                 }
                 // Cancelled or denied.
-                else {
+                else
+                {
                     Toast.makeText(this, "Permission denied!", Toast.LENGTH_LONG).show();
                 }
                 break;
@@ -240,19 +255,20 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     }
 
     // Find Location provider is openning.
-    private String getEnabledLocationProvider() {
+    private String getEnabledLocationProvider()
+    {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         // Criteria to find location provider.
         Criteria criteria = new Criteria();
 
         // Returns the name of the provider that best meets the given criteria.
-        // ==> "gps", "network",...
         String bestProvider = locationManager.getBestProvider(criteria, true);
 
         boolean enabled = locationManager.isProviderEnabled(bestProvider);
 
-        if (!enabled) {
+        if (!enabled)
+        {
             Toast.makeText(this, "No location provider enabled!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "No location provider enabled!");
             return null;
@@ -261,13 +277,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     }
 
     // Call this method only when you have the permissions to view a user's location.
-    private void showMyLocation() {
-
+    private void showMyLocation()
+    {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         String locationProvider = this.getEnabledLocationProvider();
-
-        if (locationProvider == null) {
+        if (locationProvider == null)
+        {
             return;
         }
 
@@ -289,15 +304,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
                     .getLastKnownLocation(locationProvider);
         }
         // With Android API >= 23, need to catch SecurityException.
-        catch (SecurityException e) {
+        catch (SecurityException e)
+        {
             Toast.makeText(this, "Show My Location Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             Log.e(MYTAG, "Show My Location Error:" + e.getMessage());
             e.printStackTrace();
             return;
         }
 
-        if (myLocation != null) {
-
+        if (myLocation != null)
+        {
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
 
@@ -321,8 +337,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
             Toast.makeText(this, "Location not found!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "Location not found");
         }
-
-
     }
 
     //maybe comment it, becouse is in listener of a button
@@ -342,7 +356,4 @@ public class MapsActivity extends AppCompatActivity implements LocationListener
     public void onProviderDisabled(String provider) {
     }
 
-
-
-
-        }
+}

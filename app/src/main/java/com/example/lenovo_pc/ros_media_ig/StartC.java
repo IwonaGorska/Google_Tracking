@@ -20,7 +20,8 @@ public class StartC extends MapsActivity
 {
     //private LocationListener MyLocationListener;
 
-    public void createLocationRequest() {
+    public void createLocationRequest()
+    {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
@@ -35,22 +36,26 @@ public class StartC extends MapsActivity
                 LOCATION_UPDATE_MIN_DISTANCE, locationListener);
     }*/
 
-    private LocationManager getLocationManager() {
+    private LocationManager getLocationManager()
+    {
         //Context context ="com.example.lenovo_pc.ros_media_ig.MapsActivity";
         return (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
-    public void startGpsListening(Location start) {
+    public void startGpsListening(Location start)
+    {
         this.startLocation = start;
         //addLocationListener();
         LocationProvider locationProvider = getLocationManager().getProvider(LocationManager.GPS_PROVIDER);
 
     }
 
-    public void redrawLine(){
+    public void redrawLine()
+    {
         myMap.clear();  //clears all Markers and Polylines
         PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
-        for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < points.size(); i++)
+        {
             LatLng point = points.get(i);
             options.add(point);
         }
@@ -58,7 +63,8 @@ public class StartC extends MapsActivity
         line = myMap.addPolyline(options); //add Polyline
     }
 
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(Location location)
+    {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude); //you already have this
